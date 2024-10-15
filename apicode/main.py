@@ -12,7 +12,7 @@ async def read_root():
     return """
     <html>
         <head>
-            <title>Q&A Application</title>
+            <title>Welcome to the Q&A Application</title>
             <style>
                 body {
                     font-family: Arial, sans-serif;
@@ -20,8 +20,13 @@ async def read_root():
                     margin: 0;
                     padding: 20px;
                 }
+                h1 {
+                    color: #4a4a4a;
+                    text-align: center;
+                }
                 h2 {
                     color: #333;
+                    text-align: center;
                 }
                 .container {
                     max-width: 600px;
@@ -30,6 +35,10 @@ async def read_root():
                     background: white;
                     border-radius: 5px;
                     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                }
+                p {
+                    text-align: center;
+                    font-size: 1.1em;
                 }
                 input[type="text"], input[type="submit"] {
                     width: 100%;
@@ -51,7 +60,9 @@ async def read_root():
         </head>
         <body>
             <div class="container">
-                <h2>Ask a Question</h2>
+                <h1>Welcome to the Q&A Application!</h1>
+                <h2>Ask Your Questions</h2>
+                <p>This application allows you to ask questions and get answers based on the provided context. Simply enter your context and your question below.</p>
                 <form action="/ask_question/" method="post">
                     <input type="text" name="context" placeholder="Provide context for your question" required>
                     <input type="text" name="question" placeholder="Ask your question" required>
@@ -67,6 +78,7 @@ async def ask_question(context: str = Form(...), question: str = Form(...)):
     try:
         # Analyze using the LLM model
         result = llm(question=question, context=context)
+
         return JSONResponse(content={"answer": result['answer']})
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
