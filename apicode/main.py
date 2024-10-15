@@ -1,23 +1,18 @@
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 from transformers import pipeline
-import pdfplumber
 
 app = FastAPI()
 
-# Load a smaller LLM model
-llm = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
-
-# Mount static files for HTML
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Load your LLM model
+llm = pipeline("question-answering")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     return """
     <html>
         <head>
-            <title>File Upload and Q&A</title>
+            <title>Q&A Application</title>
             <style>
                 body {
                     font-family: Arial, sans-serif;
@@ -36,7 +31,7 @@ async def read_root():
                     border-radius: 5px;
                     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
                 }
-                input[type="file"], input[type="text"], input[type="submit"] {
+                input[type="text"], input[type="submit"] {
                     width: 100%;
                     padding: 10px;
                     margin: 10px 0;
@@ -56,9 +51,9 @@ async def read_root():
         </head>
         <body>
             <div class="container">
-                <h2>Upload File and Ask a Question</h2>
-                <form action="/uploadfile/" method="post" enctype="multipart/form-data">
-                    <input type="file" name="file" required>
+                <h2>Ask a Question</h2>
+                <form action="/ask_question/" method="post">
+                    <input type="text" name="context" placeholder="Provide context for your question" required>
                     <input type="text" name="question" placeholder="Ask your question" required>
                     <input type="submit" value="Submit">
                 </form>
@@ -67,20 +62,11 @@ async def read_root():
     </html>
     """
 
-@app.post("/uploadfile/")
-async def upload_file(file: UploadFile = File(...), question: str = Form(...)):
+@app.post("/ask_question/")
+async def ask_question(context: str = Form(...), question: str = Form(...)):
     try:
-        contents = await file.read()
-        
-        # Use pdfplumber to extract text from PDF
-        text = ""
-        with pdfplumber.open(file.file) as pdf:
-            for page in pdf.pages:
-                text += page.extract_text() + "\n"
-
-        # Analyze using the smaller LLM model
-        result = llm(question=question, context=text)
-
+        # Analyze using the LLM model
+        result = llm(question=question, context=context)
         return JSONResponse(content={"answer": result['answer']})
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
