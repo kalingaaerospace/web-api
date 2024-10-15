@@ -3,3 +3,10 @@ uvicorn
 transformers
 pdfplumber
 tokenizers
+numpy
+pandas
+scikit-learn
+requests
+pydantic
+python-multipart
+aiofiles
