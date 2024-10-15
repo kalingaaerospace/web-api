@@ -70,13 +70,13 @@ async def read_root():
 @app.post("/uploadfile/")
 async def upload_file(file: UploadFile = File(...), question: str = Form(...)):
     try:
-        contents = await file.read()
-        
         # Use pdfplumber to extract text from PDF
         text = ""
         with pdfplumber.open(file.file) as pdf:
             for page in pdf.pages:
-                text += page.extract_text() + "\n"
+                extracted_text = page.extract_text()
+                if extracted_text:
+                    text += extracted_text + "\n"
 
         # Analyze using the LLM model
         result = llm(question=question, context=text)
